@@ -109,7 +109,15 @@ source $ZSH/oh-my-zsh.sh
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
+#-------------------------------------------------------------------------------------------------------
+GREEN="\e[0;32m\033[1m"
+BLUE="\e[0;34m\033[1m"
+YELLOW="\e[0;33m\033[1m"
+PURPLE="\e[0;35m\033[1m"
+TURQ="\e[0;36m\033[1m"
+GRAY="\e[0;37m\033[1m"
+RED='\033[0;31m'
+NC='\033[0m'
 #-------------------------------------------------------------------------------------------------------
 #Alias
 alias cls="clear"
@@ -127,31 +135,68 @@ alias gpl="git pull"
 alias gps="git push"
 alias gnew="git checkout -b"
 alias gck="git checkout"
+alias gad="git add"
 
 #Alias maven
 alias mvni="mvn clean install -Dmaven.test.skip"
+alias mvnc="mvn clean compile -Dmaven.test.skip"
+alias jvm="mvn spring-boot:run -Duser.timezone=UTC -Dserver.port=8080 -Dspring.profiles.active=pre,local -Dspring.cloud.config.label=pre -Dspring.config.import=optional:configserver:http://sys-config-pre.oneboxtickets.net -Dspring.main.allow-bean-definition-overriding=true"
 
 #Alias kubernetes
 alias kubec="kubectl config get-contexts"
 alias kubecc="kubectl config current-context"
 alias kubeuc="kubectl config use-context"
 alias kubei="kubeinfo"
+alias kube="kubectl"
 
 kubeinfo ()
 {
-	echo "###############################################################################"
-	echo "[*] Listar pods --> kubectl get pods"
-	echo "[*] Listar namespaces --> kubectl get namespaces"
-	echo "[*] Listar servicios --> kubectl get svc"
-	echo "[*] Listar deployments --> kubectl get deployments"
-	echo "[*] Describe pod --> kubectl describe pod {pod}"
-	echo "[*] Editar deployment --> kubectl edit deployment {deployment_name}"
-	echo "[*] Editar servicio --> kubectl edit svc {svc_name}"
-	echo "[*] Mirar logs de un pod --> kubectl logs -f {pod}"
-	echo "[*] Mirar dentro del pod --> kubectl exect -it {pod} bash"
-	echo "#################################################################################"
+	echo "$YELLOW ############################################################################### $NC"
+	echo "$GREEN [*] $NC Listar pods -->get pods"
+	echo "$GREEN [*] $NC Listar namespaces -->get namespaces"
+	echo "$GREEN [*] $NC Listar servicios -->get svc"
+	echo "$GREEN [*] $NC Listar deployments -->get deployments"
+	echo "$GREEN [*] $NC Describe pod -->describe pod {variable}"
+	echo "$GREEN [*] $NC Editar deployment -->edit deployment {variable}"
+	echo "$GREEN [*] $NC Editar servicio -->edit svc {variable}"
+	echo "$GREEN [*] $NC Mirar logs de un pod -->logs -f {variable}"
+	echo "$GREEN [*] $NC Mirar dentro del pod -->exec -it {variable} bash"
+	echo "$YELLOW ################################################################################# $NC"
 }
 
+kubes()
+{
+		kube $(kubei | fzf | awk -F "-->" '{print$2}')
+}
+
+
+getdeploy()
+{
+	if [[ $1 == "help" || -z $1 ]]; then
+		echo ""
+		echo "$YELLOW***********************************$NC"
+		echo " getdeploy $GREEN nombre_servicio $NC"
+		echo "$YELLOW***********************************$NC"
+	else
+		echo ""
+		echo "$RED$1:$(kubectl get -o json deployment $1 | grep "$1:" | awk -F ":" '{print$3}' | awk -F "\"" '{print$1}')$NC"
+		echo ""	
+	fi
+}
+
+openapi() {
+
+	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
+
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo " $GREEN param2 =$NC rama (feature/OB-XXXX)"
+		echo " $GREEN param3 =$NC public/internal"
+		echo "$YELLOW***************************$NC"
+	else
+		google-chrome http://onebox-api-docs.s3.amazonaws.com/$1/$2/v1/$3/$1-spec.html &
+	fi
+}
 
 
 
@@ -161,3 +206,7 @@ kubeinfo ()
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+export XAUTHORITY=/home/ismael/.Xauthority
+
+export XAUTHORITY=/home/ismael/.Xauthority
