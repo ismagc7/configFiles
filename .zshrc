@@ -121,7 +121,7 @@ NC='\033[0m'
 #-------------------------------------------------------------------------------------------------------
 #Alias
 alias cls="clear"
-alias zshc="nano ~/.zshrc"
+alias zshc="code ~/.zshrc"
 alias zshs="source ~/.zshrc"
 alias ll="ls -la"
 alias dev="cd ~/Dev"
@@ -139,8 +139,8 @@ alias gad="git add"
 
 #Alias maven
 alias mvni="mvn clean install -Dmaven.test.skip"
+alias mvnit="mvn clean install"
 alias mvnc="mvn clean compile -Dmaven.test.skip"
-alias jvm="mvn spring-boot:run -Duser.timezone=UTC -Dserver.port=8080 -Dspring.profiles.active=pre,local -Dspring.cloud.config.label=pre -Dspring.config.import=optional:configserver:http://sys-config-pre.oneboxtickets.net -Dspring.main.allow-bean-definition-overriding=true"
 
 #Alias kubernetes
 alias kubec="kubectl config get-contexts"
@@ -148,6 +148,7 @@ alias kubecc="kubectl config current-context"
 alias kubeuc="kubectl config use-context"
 alias kubei="kubeinfo"
 alias kube="kubectl"
+alias kubeed="kube edit deployment $1"
 
 kubeinfo ()
 {
@@ -157,10 +158,14 @@ kubeinfo ()
 	echo "$GREEN [*] $NC Listar servicios -->get svc"
 	echo "$GREEN [*] $NC Listar deployments -->get deployments"
 	echo "$GREEN [*] $NC Describe pod -->describe pod {variable}"
-	echo "$GREEN [*] $NC Editar deployment -->edit deployment {variable}"
 	echo "$GREEN [*] $NC Editar servicio -->edit svc {variable}"
 	echo "$GREEN [*] $NC Mirar logs de un pod -->logs -f {variable}"
 	echo "$GREEN [*] $NC Mirar dentro del pod -->exec -it {variable} bash"
+	echo "$YELLOW *********************************************************************************** $NC"
+	echo "$GREEN [*] $NC Listar contextos --> $RED kubec $NC" 
+	echo "$GREEN [*] $NC Setear current context default --> $RED kubecc $NC"
+	echo "$GREEN [*] $NC Usar contexto --> $RED kubeuc dev-env/pre/pre01/pro $NC"  
+	echo "$GREEN [*] $NC Editar deployment --> $RED kubeed {variable} $NC "
 	echo "$YELLOW ################################################################################# $NC"
 }
 
@@ -169,8 +174,47 @@ kubes()
 		kube $(kubei | fzf | awk -F "-->" '{print$2}')
 }
 
+kubegp()
+{
+	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
 
-getdeploy()
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo "$YELLOW***************************$NC"
+	else
+		if [[ ! -z $2 && $2 == "w" || $2 == "W" ]]; then 
+			kube get pods -w | grep $1
+		else
+			kube get pods | grep $1
+		fi
+	fi
+}
+
+kubedp ()
+{
+
+	if [[ -z $1 ]]; then
+		echo " "
+		echo "$RED Falta el parametro donde se indica el componente p.e: ms-order $NC"
+	else
+		result=$(kube get pods | grep $1 | fzf | awk -F " " '{print$1}')
+	 	kube delete pod $result
+	 	sleep 1
+	 	echo "********************************************************"
+
+		if [[ -z $2 ]]; then 
+			kubegp $1
+		else
+			kubegp $1 w
+		fi
+
+	fi
+
+	 
+}
+
+
+gdep()
 {
 	if [[ $1 == "help" || -z $1 ]]; then
 		echo ""
@@ -179,12 +223,12 @@ getdeploy()
 		echo "$YELLOW***********************************$NC"
 	else
 		echo ""
-		echo "$RED$1:$(kubectl get -o json deployment $1 | grep "$1:" | awk -F ":" '{print$3}' | awk -F "\"" '{print$1}')$NC"
+		echo "$1:$RED $(kubectl get -o json deployment $1 | grep "$1:" | awk -F ":" '{print$3}' | awk -F "\"" '{print$1}')$NC"
 		echo ""	
 	fi
 }
 
-openapi() {
+api() {
 
 	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
 
@@ -198,11 +242,96 @@ openapi() {
 	fi
 }
 
+jk() {
 
+	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
+
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo "$YELLOW***************************$NC"
+	else
+		google-chrome https://jenkins.onebox.services/blue/organizations/jenkins/OneboxTM%20Organization%2F$1/branches &
+	fi
+
+}
+
+gh() {
+
+	
+
+	if [[ -z $1 ]]; then
+
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo " $GREEN param2 =$NC (pulls || feature/OB-XXXX)"
+		echo "$YELLOW***************************$NC"
+	else
+
+		if [[ ! -z $2 ]]; then
+
+			if [[ $2 == "pulls" ]]; then 
+				google-chrome https://github.com/OneboxTM/$1/$2 &
+			fi
+			
+			if [[ $2 == "feature/OB-"* ]]; then 
+				google-chrome https://github.com/OneboxTM/$1/tree/$2
+			fi
+		else
+			if [[ ! -z $1 && $1 == "repo" ]]; then 
+				google-chrome https://github.com/orgs/OneboxTM/teams/developers/repositories &
+			else
+				google-chrome https://github.com/OneboxTM/$1 &
+			fi
+		fi	 
+	fi
+}
+
+jira() {
+
+	if [[ $1 == "help" || $1 == "h" ]]; then 
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN PARAM1 $NC feature/Ob-XXXXX"
+		echo "$YELLOW***************************$NC"
+	fi
+
+	if [[ $1 == *"OB-"* && ! -z $1 ]]; then
+		
+		if [[ ! -z $2 && $2 == "print" ]]; then
+			echo "https://oneboxtds.atlassian.net/browse/$1"
+		else
+			google-chrome https://oneboxtds.atlassian.net/browse/$1 &
+		fi
+		
+	else 
+		if [[ -z $1 ]]; then
+			google-chrome https://oneboxtds.atlassian.net/jira/software/c/projects/OB/boards/133/backlog &
+		fi
+	fi
+}
+
+info() {
+
+	echo "$YELLOW***************************$NC"
+	echo " $GREEN gdep $NC te dice que rama hay deployada en ese contexto para ese componente"
+	echo " $GREEN api $NC te abre la apidoc"
+	echo " $GREEN gh $NC te abre la pagina de github pasandole el componente por parametro"
+	echo " $GREEN jk $NC te abre la pagina de jenkins pasandole el componente por parametro"
+	echo " $GREEN jira $NC te abre la pagina de jira pasandole la rama o todas las incidencias"
+	echo "$YELLOW***************************$NC"
+
+}
+
+zshp () {
+	cd ~/Dev/repos/configFiles
+	git add ./.zshrc
+	git commit -m "Subida del archivo .zshrc"
+	git push
+}
 
 
 #------------------------------------------------------------------------------------------------------
 
+export KUBE_EDITOR="/usr/bin/nano"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
@@ -210,3 +339,5 @@ export SDKMAN_DIR="$HOME/.sdkman"
 export XAUTHORITY=/home/ismael/.Xauthority
 
 export XAUTHORITY=/home/ismael/.Xauthority
+
+
