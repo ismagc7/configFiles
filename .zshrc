@@ -199,11 +199,11 @@ kubedp ()
 	else
 		result=$(kube get pods | grep $1 | fzf | awk -F " " '{print$1}')
 	 	kube delete pod $result
-	 	sleep 1
 	 	echo "********************************************************"
 
 		if [[ -z $2 ]]; then 
 			kubegp $1
+			echo "*************************************************"
 		else
 			kubegp $1 w
 		fi
@@ -326,6 +326,30 @@ zshp () {
 	git add ./.zshrc
 	git commit -m "Subida del archivo .zshrc"
 	git push
+}
+
+kubegpf () {
+	if [[ -z $1 ]]; then 
+		kube get pods -n features
+	else
+			echo ""
+			kube get pods -n features | grep $1
+	fi
+}
+
+kubegl (){
+
+	if [[ -z $1 || $1 == "help" ]]; then
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 = componente $NC  te muestra los logs del pod"
+		echo "$YELLOW***************************$NC"
+	else
+		kube logs -f $(kubegp $1 | fzf | awk -F " " '{print$1}')
+	fi
+}
+
+Kubernetic () {
+	~/.AppImages/Kubernetic-4.3.0.AppImage
 }
 
 
