@@ -193,6 +193,12 @@ kubegp()
 kubedp ()
 {
 
+	if [[ $1 == "help" || $1 == "-h" || $1 == "h" ]]; then
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo "$YELLOW***************************$NC"
+	fi
+
 	if [[ -z $1 ]]; then
 		echo " "
 		echo "$RED Falta el parametro donde se indica el componente p.e: ms-order $NC"
@@ -256,9 +262,6 @@ jk() {
 }
 
 gh() {
-
-	
-
 	if [[ -z $1 ]]; then
 
 		echo "$YELLOW***************************$NC"
@@ -317,8 +320,11 @@ info() {
 	echo " $GREEN gh $NC te abre la pagina de github pasandole el componente por parametro"
 	echo " $GREEN jk $NC te abre la pagina de jenkins pasandole el componente por parametro"
 	echo " $GREEN jira $NC te abre la pagina de jira pasandole la rama o todas las incidencias"
+	echo " $GREEN zshp $NC hace push del proyecto configFile"
+	echo " $GREEN kubedp $NC elimina pods pasandole el componente por parametro, si le pasas 'w' se queda esperando"
+	echo " $GREEN kubegl $NC te muestra los logs de un componente, usa fzf"
+	echo " $GREEN kubegpf $NC te muestra los pods de features"
 	echo "$YELLOW***************************$NC"
-
 }
 
 zshp () {
@@ -351,7 +357,6 @@ kubegl (){
 Kubernetic () {
 	~/.AppImages/Kubernetic-4.3.0.AppImage
 }
-
 
 #------------------------------------------------------------------------------------------------------
 
