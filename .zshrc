@@ -123,6 +123,7 @@ NC='\033[0m'
 alias cls="clear"
 alias zshc="code ~/.zshrc"
 alias zshs="source ~/.zshrc"
+alias ls="lsd"
 alias ll="ls -la"
 alias dev="cd ~/Dev"
 alias cat="batcat"
@@ -148,7 +149,15 @@ alias kubecc="kubectl config current-context"
 alias kubeuc="kubectl config use-context"
 alias kubei="kubeinfo"
 alias kube="kubectl"
-alias kubeed="kube edit deployment $1"
+
+kubeed ()
+{
+	if [[ -z $1 ]]; then 
+		echo "$RED No has pasado ningun parametro $NC"
+	else
+		kube edit deployment $1
+	fi
+}
 
 kubeinfo ()
 {
@@ -355,7 +364,8 @@ kubegl (){
 }
 
 Kubernetic () {
-	~/.AppImages/Kubernetic-4.3.0.AppImage
+	~/.AppImages/$(ls ~/.AppImages | grep Kubernetic) &> /dev/null & disown
+	exit
 }
 
 #------------------------------------------------------------------------------------------------------
