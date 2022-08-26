@@ -150,12 +150,128 @@ alias kubeuc="kubectl config use-context"
 alias kubei="kubeinfo"
 alias kube="kubectl"
 
+
+#Configuración
+zshp () {
+	cd ~/Dev/repos/configFiles
+	git add ./.zshrc
+	git commit -m "Subida del archivo .zshrc"
+	git push
+}
+
+tmuxt () {
+	
+	if [[ -z $1 ]]; then
+		/usr/bin/tmux new -s "Pruebas"
+	else 
+		/usr/bin/tmux new -s $1
+	fi
+}
+
+#Otros
+api() {
+
+	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
+
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo " $GREEN param2 =$NC rama (feature/OB-XXXX)"
+		echo " $GREEN param3 =$NC public/internal"
+		echo "$YELLOW***************************$NC"
+	else
+		google-chrome http://onebox-api-docs.s3.amazonaws.com/$1/$2/v1/$3/$1-spec.html &
+	fi
+}
+
+
+
+
+jk() {
+
+	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
+
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo "$YELLOW***************************$NC"
+	else
+		google-chrome https://jenkins.onebox.services/blue/organizations/jenkins/OneboxTM%20Organization%2F$1/branches &
+	fi
+
+}
+
+gh() {
+	if [[ -z $1 ]]; then
+
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
+		echo " $GREEN param2 =$NC (pulls || feature/OB-XXXX)"
+		echo "$YELLOW***************************$NC"
+	else
+
+		if [[ ! -z $2 ]]; then
+
+			if [[ $2 == "pulls" ]]; then 
+				google-chrome https://github.com/OneboxTM/$1/$2 &
+			fi
+			
+			if [[ $2 == "feature/OB-"* ]]; then 
+				google-chrome https://github.com/OneboxTM/$1/tree/$2
+			fi
+		else
+			if [[ ! -z $1 && $1 == "repo" ]]; then 
+				google-chrome https://github.com/orgs/OneboxTM/teams/developers/repositories &
+			else
+				google-chrome https://github.com/OneboxTM/$1 &
+			fi
+		fi	 
+	fi
+}
+
+jira() {
+
+	if [[ $1 == "help" || $1 == "h" ]]; then 
+		echo "$YELLOW***************************$NC"
+		echo " $GREEN PARAM1 $NC feature/Ob-XXXXX"
+		echo "$YELLOW***************************$NC"
+	fi
+
+	if [[ $1 == *"OB-"* && ! -z $1 ]]; then
+		
+		if [[ ! -z $2 && $2 == "print" ]]; then
+			echo "https://oneboxtds.atlassian.net/browse/$1"
+		else
+			google-chrome https://oneboxtds.atlassian.net/browse/$1 &
+		fi
+		
+	else 
+		if [[ -z $1 ]]; then
+			google-chrome https://oneboxtds.atlassian.net/jira/software/c/projects/OB/boards/133/backlog &
+		fi
+	fi
+}
+
+info() {
+
+	echo "$YELLOW***************************$NC"
+	echo " $GREEN gdep $NC te dice que rama hay deployada en ese contexto para ese componente"
+	echo " $GREEN api $NC te abre la apidoc"
+	echo " $GREEN gh $NC te abre la pagina de github pasandole el componente por parametro"
+	echo " $GREEN jk $NC te abre la pagina de jenkins pasandole el componente por parametro"
+	echo " $GREEN jira $NC te abre la pagina de jira pasandole la rama o todas las incidencias"
+	echo " $GREEN zshp $NC hace push del proyecto configFile"
+	echo " $GREEN kubedp $NC elimina pods pasandole el componente por parametro, si le pasas 'w' se queda esperando"
+	echo " $GREEN kubegl $NC te muestra los logs de un componente, usa fzf"
+	echo " $GREEN kubegpf $NC te muestra los pods de features"
+	echo "$YELLOW***************************$NC"
+}
+
+#Kubernetes
 kubeed ()
 {
 	if [[ -z $1 ]]; then 
 		echo "$RED No has pasado ningun parametro $NC"
 	else
-		kube edit deployment $1
+		kube edit deployment $(kube get deployments | grep $1 | fzf | awk -F " " '{print$1}')
 	fi
 }
 
@@ -243,105 +359,7 @@ gdep()
 	fi
 }
 
-api() {
 
-	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
-
-		echo "$YELLOW***************************$NC"
-		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
-		echo " $GREEN param2 =$NC rama (feature/OB-XXXX)"
-		echo " $GREEN param3 =$NC public/internal"
-		echo "$YELLOW***************************$NC"
-	else
-		google-chrome http://onebox-api-docs.s3.amazonaws.com/$1/$2/v1/$3/$1-spec.html &
-	fi
-}
-
-jk() {
-
-	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
-
-		echo "$YELLOW***************************$NC"
-		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
-		echo "$YELLOW***************************$NC"
-	else
-		google-chrome https://jenkins.onebox.services/blue/organizations/jenkins/OneboxTM%20Organization%2F$1/branches &
-	fi
-
-}
-
-gh() {
-	if [[ -z $1 ]]; then
-
-		echo "$YELLOW***************************$NC"
-		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
-		echo " $GREEN param2 =$NC (pulls || feature/OB-XXXX)"
-		echo "$YELLOW***************************$NC"
-	else
-
-		if [[ ! -z $2 ]]; then
-
-			if [[ $2 == "pulls" ]]; then 
-				google-chrome https://github.com/OneboxTM/$1/$2 &
-			fi
-			
-			if [[ $2 == "feature/OB-"* ]]; then 
-				google-chrome https://github.com/OneboxTM/$1/tree/$2
-			fi
-		else
-			if [[ ! -z $1 && $1 == "repo" ]]; then 
-				google-chrome https://github.com/orgs/OneboxTM/teams/developers/repositories &
-			else
-				google-chrome https://github.com/OneboxTM/$1 &
-			fi
-		fi	 
-	fi
-}
-
-jira() {
-
-	if [[ $1 == "help" || $1 == "h" ]]; then 
-		echo "$YELLOW***************************$NC"
-		echo " $GREEN PARAM1 $NC feature/Ob-XXXXX"
-		echo "$YELLOW***************************$NC"
-	fi
-
-	if [[ $1 == *"OB-"* && ! -z $1 ]]; then
-		
-		if [[ ! -z $2 && $2 == "print" ]]; then
-			echo "https://oneboxtds.atlassian.net/browse/$1"
-		else
-			google-chrome https://oneboxtds.atlassian.net/browse/$1 &
-		fi
-		
-	else 
-		if [[ -z $1 ]]; then
-			google-chrome https://oneboxtds.atlassian.net/jira/software/c/projects/OB/boards/133/backlog &
-		fi
-	fi
-}
-
-info() {
-
-	echo "$YELLOW***************************$NC"
-	echo " $GREEN gdep $NC te dice que rama hay deployada en ese contexto para ese componente"
-	echo " $GREEN api $NC te abre la apidoc"
-	echo " $GREEN gh $NC te abre la pagina de github pasandole el componente por parametro"
-	echo " $GREEN jk $NC te abre la pagina de jenkins pasandole el componente por parametro"
-	echo " $GREEN jira $NC te abre la pagina de jira pasandole la rama o todas las incidencias"
-	echo " $GREEN zshp $NC hace push del proyecto configFile"
-	echo " $GREEN kubedp $NC elimina pods pasandole el componente por parametro, si le pasas 'w' se queda esperando"
-	echo " $GREEN kubegl $NC te muestra los logs de un componente, usa fzf"
-	echo " $GREEN kubegpf $NC te muestra los pods de features"
-	echo "$YELLOW***************************$NC"
-}
-
-zshp () {
-	cd ~/Dev/repos/configFiles
-	git add ./.zshrc
-	git commit -m "Subida del archivo .zshrc"
-	git push
-}
 
 kubegpf () {
 	if [[ -z $1 ]]; then 
@@ -367,6 +385,8 @@ Kubernetic () {
 	~/.AppImages/$(ls ~/.AppImages | grep Kubernetic) &> /dev/null & disown
 	exit
 }
+
+
 
 #------------------------------------------------------------------------------------------------------
 
