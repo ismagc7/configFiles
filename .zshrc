@@ -77,8 +77,12 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
-
+plugins=(
+	git
+	zsh-syntax-highlighting
+	)
+# Antigen Plugin
+source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/antigen/antigen.zsh
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -144,14 +148,24 @@ alias mvnit="mvn clean install"
 alias mvnc="mvn clean compile -Dmaven.test.skip"
 
 #Alias kubernetes
-alias kubec="kubectl config get-contexts"
-alias kubecc="kubectl config current-context"
-alias kubeuc="kubectl config use-context"
-alias kubei="kubeinfo"
-alias kube="kubectl"
+alias kgc="kubectl config get-contexts"
+alias kcc="kubectl config current-context"
+alias kset="kubectl config use-context"
+alias k="kubectl"
 
 
 #Configuración
+
+setScreen() {
+	output=$(cvt -r 2560 1080 60 | tail -n 1 | sed 's/Modeline//1')
+	nombre=$(echo $output | cut -d "\"" -f 2)
+	echo $nombre
+	xrandr --newmode $output
+	xrandr --addmode DP-3-1 $nombre
+	sleep 2
+	xrandr --output DP-3-1 --mode $nombre
+}
+
 zshp () {
 	cd ~/Dev/repos/configFiles
 	git add ./.zshrc
@@ -183,6 +197,10 @@ api() {
 	fi
 }
 
+meet() {
+	google-chrome http://meet.google.com/new &
+}
+
 
 
 
@@ -194,7 +212,7 @@ jk() {
 		echo " $GREEN param1 =$NC nombre proyecto (api-member-external)"
 		echo "$YELLOW***************************$NC"
 	else
-		google-chrome https://jenkins.onebox.services/blue/organizations/jenkins/OneboxTM%20Organization%2F$1/branches &
+		google-chrome https://jenkins.onebox.services/blue/organizations/jenkins/OneboxTM%20Organization%2F$1/branches & 
 	fi
 
 }
@@ -266,7 +284,7 @@ info() {
 }
 
 #Kubernetes
-kubeed ()
+ked ()
 {
 	if [[ -z $1 ]]; then 
 		echo "$RED No has pasado ningun parametro $NC"
@@ -275,7 +293,7 @@ kubeed ()
 	fi
 }
 
-kubeinfo ()
+ki ()
 {
 	echo "$YELLOW ############################################################################### $NC"
 	echo "$GREEN [*] $NC Listar pods -->get pods"
@@ -294,12 +312,7 @@ kubeinfo ()
 	echo "$YELLOW ################################################################################# $NC"
 }
 
-kubes()
-{
-		kube $(kubei | fzf | awk -F "-->" '{print$2}')
-}
-
-kubegp()
+kgp()
 {
 	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
 
@@ -315,7 +328,7 @@ kubegp()
 	fi
 }
 
-kubedp ()
+kdp ()
 {
 
 	if [[ $1 == "help" || $1 == "-h" || $1 == "h" ]]; then
@@ -361,7 +374,7 @@ gdep()
 
 
 
-kubegpf () {
+kgpf () {
 	if [[ -z $1 ]]; then 
 		kube get pods -n features
 	else
@@ -370,7 +383,7 @@ kubegpf () {
 	fi
 }
 
-kubegl (){
+kgl (){
 
 	if [[ -z $1 || $1 == "help" ]]; then
 		echo "$YELLOW***************************$NC"
@@ -378,6 +391,15 @@ kubegl (){
 		echo "$YELLOW***************************$NC"
 	else
 		kube logs -f $(kubegp $1 | fzf | awk -F " " '{print$1}')
+	fi
+}
+
+kpatch()
+{
+	if [[ -z $1 ]]; then 
+		echo -e "\n\n [+] $RED Falta el argumento $NC"
+	else	
+		kubectl patch deployment $1 -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"	
 	fi
 }
 
