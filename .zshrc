@@ -177,7 +177,7 @@ setScreen() {
 
 zshp () {
 	cd ~/Dev/repos/configFiles
-	git add ./.zshrc
+	git add .
 	git commit -m "Subida de archivos de configuración"
 	git push
 }
