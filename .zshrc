@@ -134,6 +134,7 @@ alias zshs="source ~/.zshrc"
 alias ls="lsd"
 alias ll="ls -la"
 alias dev="cd ~/Dev"
+alias htb="cd ~/Htb"
 alias cat="batcat"
 
 
@@ -161,10 +162,14 @@ alias k="kubectl"
 #Configuración
 
 setScreen() {
-	output=$(cvt -r 2560 1080 60 | tail -n 1 | sed 's/Modeline//1')
+	
+	output=$(cvt -r 2560 1080 60 | tail -n 1 | sed 's/Modeline //g')
 	nombre=$(echo $output | cut -d "\"" -f 2)
-	echo $nombre
-	xrandr --newmode $output
+	
+	if [[ $1 == "newmode" ]]; then
+		xrandr --newmode $output
+	fi
+	
 	xrandr --addmode DP-3-1 $nombre
 	sleep 2
 	xrandr --output DP-3-1 --mode $nombre
@@ -325,9 +330,9 @@ kgp()
 		echo "$YELLOW***************************$NC"
 	else
 		if [[ ! -z $2 && $2 == "w" || $2 == "W" ]]; then 
-			kube get pods -w | grep $1
+			kubectl get pods -w | grep $1
 		else
-			kube get pods | grep $1
+			kubectl get pods | grep $1
 		fi
 	fi
 }
@@ -422,6 +427,10 @@ extractPorts(){
 	echo $ports | tr -d '\n' | xclip -sel clip
 	echo -e "[*] Ports copied to clipboard\n"  >> extractPorts.tmp
 	cat extractPorts.tmp; rm extractPorts.tmp
+}
+
+mkt(){
+	mkdir {nmap,content,exploits,scripts}
 }
 
 
