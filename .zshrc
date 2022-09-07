@@ -161,18 +161,15 @@ alias k="kubectl"
 
 #Configuración
 
+#Cambiar configuración resolución
+#output=$(cvt -r 2560 1080 60 | tail -n 1 | sed 's/Modeline //g')
+#nombre=$(echo $output | cut -d "\"" -f 2)
+#xrandr --newmode $output
+#xrandr --addmode DP-3-1 $nombre
+#xrandr --output DP-3-1 --mode $nombre
+
 setScreen() {
-	
-	output=$(cvt -r 2560 1080 60 | tail -n 1 | sed 's/Modeline //g')
-	nombre=$(echo $output | cut -d "\"" -f 2)
-	
-	if [[ $1 == "newmode" ]]; then
-		xrandr --newmode $output
-	fi
-	
-	xrandr --addmode DP-3-1 $nombre
-	sleep 2
-	xrandr --output DP-3-1 --mode $nombre
+	autorandr --change home
 }
 
 zshp () {
@@ -399,7 +396,7 @@ kgl (){
 		echo " $GREEN param1 = componente $NC  te muestra los logs del pod"
 		echo "$YELLOW***************************$NC"
 	else
-		kube logs -f $(kubegp $1 | fzf | awk -F " " '{print$1}')
+		kubectl logs -f $(kgp $1 | fzf | awk -F " " '{print$1}')
 	fi
 }
 
