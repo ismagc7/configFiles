@@ -134,6 +134,8 @@ alias zshs="source ~/.zshrc"
 alias ls="lsd"
 alias ll="ls -la"
 alias dev="cd ~/Dev"
+alias curso="cd /home/ismael/curso"
+alias cpath="copypath"
 alias htb="cd ~/Htb"
 alias cat="batcat"
 
@@ -269,24 +271,9 @@ jira() {
 		
 	else 
 		if [[ -z $1 ]]; then
-			google-chrome https://oneboxtds.atlassian.net/jira/software/c/projects/OB/boards/133/backlog &
+			google-chrome https://oneboxtds.atlassian.net/jira/software/c/projects/OB/boards/148/backlog &
 		fi
 	fi
-}
-
-info() {
-
-	echo "$YELLOW***************************$NC"
-	echo " $GREEN gdep $NC te dice que rama hay deployada en ese contexto para ese componente"
-	echo " $GREEN api $NC te abre la apidoc"
-	echo " $GREEN gh $NC te abre la pagina de github pasandole el componente por parametro"
-	echo " $GREEN jk $NC te abre la pagina de jenkins pasandole el componente por parametro"
-	echo " $GREEN jira $NC te abre la pagina de jira pasandole la rama o todas las incidencias"
-	echo " $GREEN zshp $NC hace push del proyecto configFile"
-	echo " $GREEN kubedp $NC elimina pods pasandole el componente por parametro, si le pasas 'w' se queda esperando"
-	echo " $GREEN kubegl $NC te muestra los logs de un componente, usa fzf"
-	echo " $GREEN kubegpf $NC te muestra los pods de features"
-	echo "$YELLOW***************************$NC"
 }
 
 #Kubernetes
@@ -295,29 +282,10 @@ ked ()
 	if [[ -z $1 ]]; then 
 		echo "$RED No has pasado ningun parametro $NC"
 	else
-		kube edit deployment $(kube get deployments | grep $1 | fzf | awk -F " " '{print$1}')
+		kubectl edit deployment $(kubectl get deployments | grep $1 | fzf | awk -F " " '{print$1}')
 	fi
 }
-
-ki ()
-{
-	echo "$YELLOW ############################################################################### $NC"
-	echo "$GREEN [*] $NC Listar pods -->get pods"
-	echo "$GREEN [*] $NC Listar namespaces -->get namespaces"
-	echo "$GREEN [*] $NC Listar servicios -->get svc"
-	echo "$GREEN [*] $NC Listar deployments -->get deployments"
-	echo "$GREEN [*] $NC Describe pod -->describe pod {variable}"
-	echo "$GREEN [*] $NC Editar servicio -->edit svc {variable}"
-	echo "$GREEN [*] $NC Mirar logs de un pod -->logs -f {variable}"
-	echo "$GREEN [*] $NC Mirar dentro del pod -->exec -it {variable} bash"
-	echo "$YELLOW *********************************************************************************** $NC"
-	echo "$GREEN [*] $NC Listar contextos --> $RED kubec $NC" 
-	echo "$GREEN [*] $NC Setear current context default --> $RED kubecc $NC"
-	echo "$GREEN [*] $NC Usar contexto --> $RED kubeuc dev-env/pre/pre01/pro $NC"  
-	echo "$GREEN [*] $NC Editar deployment --> $RED kubeed {variable} $NC "
-	echo "$YELLOW ################################################################################# $NC"
-}
-
+# Modificar para que busque en kubectl get pods | fzf
 kgp()
 {
 	if [[ $1 == "help" || $1 == "h" || -z $1 ]]; then
@@ -347,15 +315,15 @@ kdp ()
 		echo " "
 		echo "$RED Falta el parametro donde se indica el componente p.e: ms-order $NC"
 	else
-		result=$(kube get pods | grep $1 | fzf | awk -F " " '{print$1}')
-	 	kube delete pod $result
+		result=$(kubectl get pods | grep $1 | fzf | awk -F " " '{print$1}')
+	 	kubectl delete pod $result
 	 	echo "********************************************************"
 
 		if [[ -z $2 ]]; then 
-			kubegp $1
+			kgp $1
 			echo "*************************************************"
 		else
-			kubegp $1 w
+			kgp $1 w
 		fi
 
 	fi
@@ -382,10 +350,10 @@ gdep()
 
 kgpf () {
 	if [[ -z $1 ]]; then 
-		kube get pods -n features
+		kubectl get pods -n features
 	else
 			echo ""
-			kube get pods -n features | grep $1
+			kubectl get pods -n features | grep $1
 	fi
 }
 
