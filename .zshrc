@@ -5,6 +5,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -190,6 +192,10 @@ tmuxt () {
 	fi
 }
 
+myIp(){
+	ip addr | grep wlp0s20f3 | grep inet | awk '{print $2}' | sed 's/\// /' | awk '{print $1}'
+}
+
 #Otros
 api() {
 
@@ -206,7 +212,14 @@ api() {
 }
 
 meet() {
-	google-chrome http://meet.google.com/new &
+	
+	echo $1
+
+	if [ $1 = "g" ]; then 
+		google-chrome http://meet.google.com/new &
+	else 
+		firefox http://meet.google.com/new &
+	fi
 }
 
 
@@ -332,32 +345,41 @@ kdp ()
 }
 
 
-gdep()
+kgd()
 {
 	if [[ $1 == "help" || -z $1 ]]; then
 		echo ""
 		echo "$YELLOW***********************************$NC"
-		echo " getdeploy $GREEN nombre_servicio $NC"
+		echo " getdeploy $GREEN [nombre_servicio...] $NC"
 		echo "$YELLOW***********************************$NC"
 	else
-		echo ""
-		echo "$1:$RED $(kubectl get -o json deployment $1 | grep "$1:" | awk -F ":" '{print$3}' | awk -F "\"" '{print$1}')$NC"
-		echo ""	
+		echo -e "\n $TURQ CONTEXT: $(kcc) $NC"
+
+		for item in $@
+		do
+			echo ""
+			branch="$(kubectl get -o json deployment $item | grep "$item:" | awk -F ":" '{print$3}' | awk -F "\"" '{print$1}')"	
+	
+			if [[ $branch == *"feature"* ]]; then
+				feature="$(echo $branch | awk -F "." '{print$2}')"
+				echo -e "$item:$PURPLE $branch$NC$RED OCUPADO$NC:$BLUE https://oneboxtds.atlassian.net/browse/$feature" $NC  
+			else
+				echo "$GREEN$item$NC:$PURPLE $branch $NC $GREEN LIBRE $NC " 
+			fi
+		done
 	fi
 }
 
-
-
 kgpf () {
 	if [[ -z $1 ]]; then 
-		kubectl get pods -n features
+		kubectl get pods -n features | grep $1
 	else
 			echo ""
 			kubectl get pods -n features | grep $1
 	fi
 }
 
-kgl (){
+kglf (){
 
 	if [[ -z $1 || $1 == "help" ]]; then
 		echo "$YELLOW***************************$NC"
@@ -396,6 +418,21 @@ extractPorts(){
 
 mkt(){
 	mkdir {nmap,content,exploits,scripts}
+}
+
+kremote(){
+	k port-forward $(kgp $1 | fzf) 8000
+}
+
+mouse(){
+	while true
+	do
+    	for ANGLE in 0 90 180 270
+   		do
+        	xdotool mousemove_relative --polar $ANGLE 100
+        	sleep 5
+    	done
+	done
 }
 
 
