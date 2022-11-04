@@ -246,6 +246,10 @@ gh() {
 		echo " $GREEN param2 =$NC (pulls || feature/OB-XXXX)"
 		echo "$YELLOW***************************$NC"
 	else
+		if [[ $1 == "pulls" ]]; then
+			google-chrome https://github.com/pulls &
+
+		fi
 
 		if [[ ! -z $2 ]]; then
 
@@ -253,9 +257,7 @@ gh() {
 				google-chrome https://github.com/OneboxTM/$1/$2 &
 			fi
 			
-			if [[ $2 == "feature/OB-"* ]]; then 
-				google-chrome https://github.com/OneboxTM/$1/tree/$2
-			fi
+			
 		else
 			if [[ ! -z $1 && $1 == "repo" ]]; then 
 				google-chrome https://github.com/orgs/OneboxTM/teams/developers/repositories &
@@ -432,6 +434,19 @@ mouse(){
         	xdotool mousemove_relative --polar $ANGLE 100
         	sleep 5
     	done
+	done
+}
+
+copy(){
+	dev
+
+	for item in $(ls)
+	do
+		if [[ $item == "sys-"* ]]; then
+			cp -r $item gh/$item
+			rm -rf gh/$item/.git
+			git init $(pwd)/gh/$item
+		fi
 	done
 }
 
